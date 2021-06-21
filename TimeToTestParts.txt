@@ -1,0 +1,97 @@
+-----------------------
+-- FUNCTIONAL TESTS
+-----------------------
+
+select ModuleTable.TopLevelPartNumber as ModelNumber, ModuleTable.PartNumber, min(DaysElapsed.DaysProcessed) as MinDays, max(DaysElapsed.DaysProcessed) as MaxDays,  avg(DaysElapsed.DaysProcessed) as AvgDays
+from ModuleTable
+inner join
+(
+       select subqueryEnd.SerialNumber, datediff(DD, subqueryStart.EventDate, subqueryEnd.EventDate) as DaysProcessed
+       from 
+       (
+             SELECT  SerialNumber, EventCode, EventDate
+             FROM     EventLog
+             WHERE  (EventDate >= CONVERT(DATETIME, '2021-01-01 00:00:00', 102))
+             group by serialnumber, eventcode, EventDate
+             having EventCode=2
+       ) subqueryStart
+       inner join
+       (
+             SELECT  SerialNumber, EventCode, EventDate
+             FROM     EventLog
+             WHERE  (EventDate >= CONVERT(DATETIME, '2021-01-01 00:00:00', 102))
+             group by serialnumber, eventcode, EventDate
+             having  eventcode<>2
+       ) subqueryEnd
+       on subqueryStart.SerialNumber = subqueryEnd.SerialNumber
+) DaysElapsed
+on ModuleTable.SerialNumber = DaysElapsed.SerialNumber
+where DaysElapsed.DaysProcessed > 0
+group by ModuleTable.TopLevelPartNumber, ModuleTable.PartNumber
+order by ModuleTable.TopLevelPartNumber, ModuleTable.PartNumber
+
+
+-----------------------
+- BURNIN TESTS
+-----------------------
+
+select ModuleTable.TopLevelPartNumber as ModelNumber, ModuleTable.PartNumber, min(DaysElapsed.DaysProcessed) as MinDays, max(DaysElapsed.DaysProcessed) as MaxDays,  avg(DaysElapsed.DaysProcessed) as AvgDays
+from ModuleTable
+inner join
+(
+       select subqueryEnd.SerialNumber, datediff(DD, subqueryStart.EventDate, subqueryEnd.EventDate) as DaysProcessed
+       from 
+       (
+             SELECT  SerialNumber, EventCode, EventDate
+             FROM     EventLog
+             WHERE  (EventDate >= CONVERT(DATETIME, '2021-01-01 00:00:00', 102))
+             group by serialnumber, eventcode, EventDate
+             having EventCode=20
+       ) subqueryStart
+       inner join
+       (
+             SELECT  SerialNumber, EventCode, EventDate
+             FROM     EventLog
+             WHERE  (EventDate >= CONVERT(DATETIME, '2021-01-01 00:00:00', 102))
+             group by serialnumber, eventcode, EventDate
+             having  eventcode<>20
+       ) subqueryEnd
+       on subqueryStart.SerialNumber = subqueryEnd.SerialNumber
+) DaysElapsed
+on ModuleTable.SerialNumber = DaysElapsed.SerialNumber
+where DaysElapsed.DaysProcessed > 0
+group by ModuleTable.TopLevelPartNumber, ModuleTable.PartNumber
+order by ModuleTable.TopLevelPartNumber, ModuleTable.PartNumber
+
+-----------------------
+-- SYSTEM TESTS
+-----------------------
+
+select ModuleTable.TopLevelPartNumber as ModelNumber, ModuleTable.PartNumber, min(DaysElapsed.DaysProcessed) as MinDays, max(DaysElapsed.DaysProcessed) as MaxDays,  avg(DaysElapsed.DaysProcessed) as AvgDays
+from ModuleTable
+inner join
+(
+       select subqueryEnd.SerialNumber, datediff(DD, subqueryStart.EventDate, subqueryEnd.EventDate) as DaysProcessed
+       from 
+       (
+             SELECT  SerialNumber, EventCode, EventDate
+             FROM     EventLog
+             WHERE  (EventDate >= CONVERT(DATETIME, '2021-01-01 00:00:00', 102))
+             group by serialnumber, eventcode, EventDate
+             having EventCode=6
+       ) subqueryStart
+       inner join
+       (
+             SELECT  SerialNumber, EventCode, EventDate
+             FROM     EventLog
+             WHERE  (EventDate >= CONVERT(DATETIME, '2021-01-01 00:00:00', 102))
+             group by serialnumber, eventcode, EventDate
+             having  eventcode<>6
+       ) subqueryEnd
+       on subqueryStart.SerialNumber = subqueryEnd.SerialNumber
+) DaysElapsed
+on ModuleTable.SerialNumber = DaysElapsed.SerialNumber
+where DaysElapsed.DaysProcessed > 0
+group by ModuleTable.TopLevelPartNumber, ModuleTable.PartNumber
+order by ModuleTable.TopLevelPartNumber, ModuleTable.PartNumber
+
