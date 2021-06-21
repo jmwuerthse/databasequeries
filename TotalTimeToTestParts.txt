@@ -1,0 +1,32 @@
+---------------------------------------------------------------------------------------
+-- The query below finds the Min, Max and Average number of days the factory in Reynosa
+-- spent since the begging of 2021 from the time a serial number was created for a
+-- Production part to when it was shipped to a customer (Final Inspection). 
+---------------------------------------------------------------------------------------
+
+select ModuleTable.TopLevelPartNumber as ModelNumber, ModuleTable.PartNumber, min(DaysElapsed.DaysProcessed) as MinDays, max(DaysElapsed.DaysProcessed) as MaxDays,  avg(DaysElapsed.DaysProcessed) as AvgDays
+from ModuleTable
+inner join
+(
+       select subqueryEnd.SerialNumber, datediff(DD, subqueryStart.EventDate, subqueryEnd.EventDate) as DaysProcessed
+       from 
+       (
+             SELECT  SerialNumber, EventCode, EventDate
+             FROM     EventLog
+             WHERE  (EventDate >= CONVERT(DATETIME, '2021-01-01 00:00:00', 102))
+             group by serialnumber, eventcode, EventDate
+             having EventCode=1 
+       ) subqueryStart
+       inner join
+       (
+             SELECT  SerialNumber, EventCode, EventDate
+             FROM     EventLog
+             WHERE  (EventDate >= CONVERT(DATETIME, '2021-01-01 00:00:00', 102))
+             group by serialnumber, eventcode, EventDate
+             having  eventcode=13
+       ) subqueryEnd
+       on subqueryStart.SerialNumber = subqueryEnd.SerialNumber
+) DaysElapsed
+on ModuleTable.SerialNumber = DaysElapsed.SerialNumber
+group by ModuleTable.TopLevelPartNumber, ModuleTable.PartNumber
+order by ModuleTable.TopLevelPartNumber, ModuleTable.PartNumber
